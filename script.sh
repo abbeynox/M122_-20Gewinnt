@@ -28,88 +28,90 @@ A_WELCOME='
 \e[35mWer die 20 erreicht gewinnt!\e[0m
 '
 
-# Funktionen
-# current_number() {
-#   local PLAYER=$1
-#   if [ -z "$PLAYER" ]; then
-#     echo "Die Variable ist nicht gesetzt."
-#   else
-#     echo "Die Variable ist gesetzt: $VARIABLE"
-#   fi
-#   echo ""
-#   echo -e "${CYAN}${PLAYER}${END} hat ${GREEN}${NUMBER}${END} hochgezählt"
-#   echo -e "Aktuelle Zahl: ${BOLD}${GREEN}${CURRENT_NUMBER}${END}"
-#   echo ""
-# }
-play_singleplayer() {
-  echo -e "Du spielst im Singleplayer Modus"
-  currentVal=0
-  # Standard Gamelogik
-  while [ "$currentVal" -lt "19" ]; do
-    read -p "Wähle【1/2】》 " userVal
-    if [ $userVal = 1 ] || [ $userVal = 2 ]; then
-      currentVal=$(($currentVal + $userVal))
-      # current_number
-      if [ $currentVal = 20 ]; then
-        echo -e "${YELLOW}You won 🌟${END}"
-        break
-      fi
-      pcVal=$(((RANDOM % 2) + 1))
-      echo -e "🤖 PcVal is: $pcVal"
-      currentVal=$(($currentVal + $pcVal))
-      if [ $currentVal = 20 ]; then
-        echo -e "${RED}You lost ☠️${END}"
-        break
-      fi
-      echo "the currentVal is: $currentVal"
-      continue
+
+ current_number() {
+  local PLAYER=$1
+  local PLAYERCOUNT=$2
+  local CURRENT_NUMBER=$3
+  local PLAYERCOLOR=$4
+  local BAR_LENGTH=$((CURRENT_NUMBER))
+  local REMAINDER=$((CURRENT_NUMBER % 5))
+  local BAR=""
+  for ((i=0; i<BAR_LENGTH; i++)); do
+    BAR="${BAR}▓"
+  done
+  if (( CURRENT_NUMBER == 20 )); then
+    BAR="████████████████"
+  else
+    local SPACES=$((20 - BAR_LENGTH - 1))
+    local SPACER=""
+    for ((i=0; i<SPACES; i++)); do
+      SPACER="${SPACER}-"
+    done
+    local COLOR="${GREEN} "
+    if (( CURRENT_NUMBER >= 9 && CURRENT_NUMBER <= 17 )); then
+      COLOR="${YELLOW} "
+    elif (( CURRENT_NUMBER >= 18 )); then
+      COLOR="${RED} "
     fi
-    # shellcheck disable=SC2071
-    if [ $userVal ] >2; then
-      echo "Falsche Eingabe"
+    echo -e "${COLOR}+=+=+=+=+=+=+=+=+=+=+=+=+${END}"
+    echo -e "${PLAYERCOLOR}${PLAYER}${END} hat ${GREEN}${PLAYERCOUNT}${END} hochgezählt"
+    echo -e "${BOLD}${COLOR}${CURRENT_NUMBER} ${BAR}${SPACER}|${END} 20"
+    echo -e "${COLOR}+=+=+=+=+=+=+=+=+=+=+=+=+${END}"
+  fi
+}
+
+
+
+play_multiplayer() {
+  printf "\nDu spielst im Multiplayer-Modus\n\n"
+
+  PLAYER1_COLOR="${CYAN}"
+  PLAYER2_COLOR="${PURPLE}"
+
+  echo -en "${PLAYER1_COLOR}Spieler 1${END}, wie heisst du? 》"
+  read player1
+  echo -en "${PLAYER2_COLOR}Spieler 2${END}, wie heisst du? 》"
+  read player2
+
+  currentVal=0
+  # Standard-Gamelogik
+  while [ "$currentVal" -lt "20" ]; do
+    while true; do
+      echo -en "${PLAYER1_COLOR}${player1}, wähle eine Zahl zwischen 1 und 2 》 ${END}"
+      read userFirstVal
+      if [ $userFirstVal = 1 ] || [ $userFirstVal = 2 ]; then
+        break
+      else
+        echo -e "${RED}Falsche Eingabe! Bitte wähle eine Zahl zwischen 1 und 2.\n${END}"
+      fi
+    done
+    currentVal=$(($currentVal + $userFirstVal))
+    current_number "$player1" "$userFirstVal" "$currentVal" "$PLAYER1_COLOR"
+    if [ $currentVal -gt 20 ]; then
+      echo -e "${PLAYER1_COLOR}${player1} hat gewonnen! 🌟${END}"
+      break
+    fi
+
+    while true; do
+      echo -en "${PLAYER2_COLOR}${player2}, wähle eine Zahl zwischen 1 und 2 》 ${END}"
+      read userSecondVal
+      if [ $userSecondVal = 1 ] || [ $userSecondVal = 2 ]; then
+        break
+      else
+        echo -e "${RED}Falsche Eingabe! Bitte wähle eine Zahl zwischen 1 und 2.\n${END}"
+      fi
+    done
+    currentVal=$(($currentVal + $userSecondVal))
+    current_number "$player2" "$userSecondVal" "$currentVal" "$PLAYER2_COLOR"
+    if [ $currentVal -gt 20 ]; then
+      echo -e "${PLAYER2_COLOR}${player2} hat gewonnen! 🌟 ${END}"
+      break
     fi
   done
 }
 
-play_multiplayer() {
-  echo -e "Du spielst im Multiplayer Modus"
-  currentVal=0
-  # Standard Gamelogik
-  while [ "$currentVal" -lt "19" ]; do
-    read -p "Spieler1 Wähle【1/2】》 " userFirstVal
-    if [ $userFirstVal = 1 ] || [ $userFirstVal = 2 ]; then
-      currentVal=$(($currentVal + $userFirstVal))
-      # current_number
-      if [ $currentVal = 20 ]; then
-        echo -e "${YELLOW}Spieler1 won 🌟${END}"
-        break
-      fi
-      read -p "Spieler2 Wähle【1/2】》 " userSecondVal
-      if [ $userSecondVal = 1 ] || [ $userSecondVal = 2 ]; then
-        currentVal=$(($currentVal + $userSecondVal))
-      else
-        echo "Falsche Eingabe"
-        while [ $userSecondVal ] >2; do
-          read -p "Spieler2 Wähle【1/2】》 " userSecondVal
-          if [ $userSecondVal = 1 ] || [ $userSecondVal = 2 ]; then
-            currentVal=$(($currentVal + $userSecondVal))
-            break
-          fi
-        done
-      fi
-      if [ $currentVal = 20 ]; then
-        echo -e "${RED}Spieler2 won 🌟${END}"
-        break
-      fi
-      echo "the currentVal is: $currentVal"
-      continue
-    fi
-    # shellcheck disable=SC2071
-    if [ $userVal ] >2; then
-      echo "Falsche Eingabe"
-    fi
-  done
-}
+
 
 echo -e "$A_WELCOME"
 echo -e "Welchen Spielmodus möchtest du spielen?"
