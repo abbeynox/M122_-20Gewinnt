@@ -61,6 +61,42 @@ A_WELCOME='
   fi
 }
 
+play_singleplayer() {
+  printf "\nDu spielst im Singleplayer-Modus\n\n"
+  PLAYER_COLOR="${CYAN}"
+  NPC_COLOR="${PURPLE}"
+
+  echo -en "Wie heisst ${PLAYER_COLOR}du${END}? 》"
+  read player1
+
+  currentVal=0
+
+  while [ "$currentVal" -lt "20" ]; do
+    while true; do
+      echo -en "${PLAYER_COLOR}${player1}, wähle eine Zahl zwischen 1 und 2 》 ${END}"
+      read userFirstVal
+      if [ $userFirstVal = 1 ] || [ $userFirstVal = 2 ]; then
+        break
+      else
+        echo -e "${RED}Falsche Eingabe! Bitte wähle eine Zahl zwischen 1 und 2.\n${END}"
+      fi
+    done
+    currentVal=$(($currentVal + $userFirstVal))
+    current_number "$player1" "$userFirstVal" "$currentVal" "$PLAYER_COLOR"
+    if [ $currentVal -gt 20 ]; then
+      echo -e "${PLAYER_COLOR}${player1} hat gewonnen! 🌟${END}"
+      break
+    fi
+
+    npcSecondVal=$(( ( RANDOM % 2 )  + 1 ))
+    currentVal=$(($currentVal + $npcSecondVal))
+    current_number "NPC" "$npcSecondVal" "$currentVal" "$NPC_COLOR"
+    if [ $currentVal -gt 20 ]; then
+      echo -e "${NPC_COLOR}NPC hat gewonnen! 🌟 ${END}"
+      break
+    fi
+  done
+}
 
 
 play_multiplayer() {
