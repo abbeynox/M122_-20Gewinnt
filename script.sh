@@ -1,7 +1,8 @@
 #!/bin/bash
 
 #
-# convertData.sh
+# 20gewinnt
+# Yao Kaiser, Giuliano Gianola, Andy Lam
 # ---------------
 # 03.03.2023
 #
@@ -35,7 +36,6 @@ A_WELCOME='
   local CURRENT_NUMBER=$3
   local PLAYERCOLOR=$4
   local BAR_LENGTH=$((CURRENT_NUMBER))
-  local REMAINDER=$((CURRENT_NUMBER % 5))
   local BAR=""
   for ((i=0; i<BAR_LENGTH; i++)); do
     BAR="${BAR}▓"
@@ -61,6 +61,24 @@ A_WELCOME='
   fi
 }
 
+play_again() {
+  while true; do
+  read -p "Möchtest du noch ein Spiel spielen? (y/n) 》 " choice
+  case "$choice" in
+    y|Y)
+      play_game
+      ;;
+    n|N)
+      echo -e "Exit"
+      exit 0
+      ;;
+    *)
+      echo -e "${RED}Falsche Eingabe! Bitte wähle 'y' oder 'n'.${END}"
+      ;;
+  esac
+  done
+}
+
 play_singleplayer() {
   printf "\nDu spielst im Singleplayer-Modus\n\n"
   PLAYER_COLOR="${CYAN}"
@@ -83,19 +101,22 @@ play_singleplayer() {
     done
     currentVal=$(($currentVal + $userFirstVal))
     current_number "$player1" "$userFirstVal" "$currentVal" "$PLAYER_COLOR"
-    if [ $currentVal -gt 20 ]; then
+    if [ $currentVal -ge 20 ]; then
       echo -e "${PLAYER_COLOR}${player1} hat gewonnen! 🌟${END}"
       break
     fi
 
+    #TODO: Besserer Algorythmus mit Schwierigkeitsgraden
     npcSecondVal=$(( ( RANDOM % 2 )  + 1 ))
     currentVal=$(($currentVal + $npcSecondVal))
     current_number "NPC" "$npcSecondVal" "$currentVal" "$NPC_COLOR"
-    if [ $currentVal -gt 20 ]; then
+    if [ $currentVal -ge 20 ]; then
       echo -e "${NPC_COLOR}NPC hat gewonnen! 🌟 ${END}"
       break
     fi
   done
+  play_again
+
 }
 
 
@@ -124,7 +145,7 @@ play_multiplayer() {
     done
     currentVal=$(($currentVal + $userFirstVal))
     current_number "$player1" "$userFirstVal" "$currentVal" "$PLAYER1_COLOR"
-    if [ $currentVal -gt 20 ]; then
+    if [ $currentVal -ge 20 ]; then
       echo -e "${PLAYER1_COLOR}${player1} hat gewonnen! 🌟${END}"
       break
     fi
@@ -140,29 +161,36 @@ play_multiplayer() {
     done
     currentVal=$(($currentVal + $userSecondVal))
     current_number "$player2" "$userSecondVal" "$currentVal" "$PLAYER2_COLOR"
-    if [ $currentVal -gt 20 ]; then
+    if [ $currentVal -ge 20 ]; then
       echo -e "${PLAYER2_COLOR}${player2} hat gewonnen! 🌟 ${END}"
       break
+    fi
+  done
+  play_again
+}
+
+
+play_game() {
+  echo -e "$A_WELCOME"
+  while true; do
+    echo -e "Welchen Spielmodus möchtest du spielen?"
+    echo -e "1. Singleplayer"
+    echo -e "2. Multiplayer"
+    echo -e "3. Exit"
+    read -p "Wähle【1/2/3】》 " spielmodus
+    if [ $spielmodus = 1 ]; then
+      play_singleplayer
+    elif [ $spielmodus = 2 ]; then
+      play_multiplayer
+    elif [ $spielmodus = 3 ]; then
+      echo -e "Exit"
+      exit 0
+    else
+      echo -e "Falsche Eingabe"
+      exit 1
     fi
   done
 }
 
 
-
-echo -e "$A_WELCOME"
-echo -e "Welchen Spielmodus möchtest du spielen?"
-echo -e "1. Singleplayer"
-echo -e "2. Multiplayer"
-echo -e "3. Exit"
-read -p "Wähle【1/2/3】》 " spielmodus
-if [ $spielmodus = 1 ]; then
-  play_singleplayer
-elif [ $spielmodus = 2 ]; then
-  play_multiplayer
-elif [ $spielmodus = 3 ]; then
-  echo -e "Exit"
-  exit 0
-else
-  echo -e "Falsche Eingabe"
-  exit 1
-fi
+play_game
