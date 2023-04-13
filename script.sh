@@ -3,6 +3,7 @@
 #
 # 20gewinnt
 # Yao Kaiser, Giuliano Gianola, Andy Lam
+# with a little help of CoPilot
 # ---------------
 # 03.03.2023
 #
